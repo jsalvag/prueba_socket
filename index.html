@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <title>socket.io</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="style.css"/>
+    <style>
+        #content{
+            display: none;
+        }
+        #chat{
+            position: relative;
+            width: 100%;
+            min-height: 100%;
+            height: 90%;
+            overflow: auto;
+        }
+        #login-error{
+            display: none;
+            width: 300px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Socket.io <small>Ejemplo de Chat</small></h1>
+        </div>
+        <div class="text-center">
+            <div class="input-group" style="width: 300px;margin: 0 auto;" id="nickContainer">
+                <input type="text" id="nickName" class="form-control input-lg" placeholder="Nombre de usuario"/>
+                <span class="input-group-btn">
+                    <button class="btn btn-lg btn-primary" type="submit" id="setNick">Entrar</button>
+                </span>
+            </div>
+            <div class="alert afde in alert-danger alert-dismissable" data-dismiss="alert" id="login-error">
+                <button type="button" class="close" id="closeAlert">x</button>
+                el nombre de usuario ya fue tomado...!
+            </div>
+        </div>
+        <div id="content" class="row" style="height: 70%;">
+            <div class="col-md-2"></div>
+
+            <div id="chatContent" class="col-md-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">CHAT</div>
+                    <div id="chat" class="panel-body"></div>
+                </div>
+
+                <div>
+                    <form id="sendMessage" class="input-group" style="text-align: center">
+                        <input type="text" id="message" class="form-control input-lg"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-lg btn-primary" type="submit">Enviar</button>
+                        </span>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">USUARIOS</div>
+                    <div class="panel-body" id="users"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<scritp src="/socket.io/socket.io.js"></scritp>-->
+    <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+    <script>
+        jQuery(function($){
+            var socket = io.connect();
+            var $messageForm = $('#sendMessage');
+            var $message = $('#message');
+            var $chat = $('#chat');
+
+            var nickname = $('#nickName');
+            var setNick = $('#setNick');
+
+            var users = $('#users');
+
+            setNick.click(function(e){
+                e.preventDefault();
+                socket.emit('newUser', nickname.val(), function(data){
+                    if(data){
+                        $('#nickContainer').hide();
+                        $('#content').show();
+                    }else{
+                        $('#login-error').show();
+                    }
+                });
+            });
+
+            $messageForm.submit(function(e){
+                e.preventDefault();
+                if($message.val()!=''){
+                    socket.emit('sendMessage', $message.val(), nickname.val());
+                }
+                $message.val('');
+            });
+            socket.on('newMessage', function(data){
+                console.log(data.toSource() + ' - ' );
+                $chat.append(data.nick + ' - ' + data.msg + '<br />');
+            });
+            socket.on('usernames', function(data){
+                var usernamesString = '';
+                for(var username in data){
+                    usernamesString += username + '<br />';
+                }
+                users.html(usernamesString);
+            });
+            /*
+            $(window).on('beforeunload', function(){
+                socket.close();
+            });*/
+        });
+    </script>
+</body>
+</html>

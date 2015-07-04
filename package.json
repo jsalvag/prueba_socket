@@ -1,0 +1,22 @@
+{
+  "name": "prueba_socket",
+  "version": "1.0.0",
+  "description": "nueva pruba de socketing",
+  "main": "servidor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "socket.io",
+    "socket",
+    "js",
+    "nodejs",
+    "express"
+  ],
+  "author": "jsalvag",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.0",
+    "socket.io":"^1.3.5"
+  }
+}
