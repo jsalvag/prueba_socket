@@ -1,5 +1,10 @@
+//configuracion del servicio http para nodejs
+
+//impoertamos los modulos necesario
 var express = require('express');
 var app = express();
+
+//creamos el servidor http
 var server = require('http').createServer(app);
 
 var io = require('socket.io').listen(server);
