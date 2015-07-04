@@ -70,37 +70,52 @@ io.sockets.on('connection', function( socket ){
 
     //inicia el juego
     socket.on('start', function(bar){
+
+        //imprime en la consola del servidor el momento en el que se inicia un juego nuevo
         console.log('iniciando partida - ' + moment().toDate());
+
+        //indica a los clientes conectados que se ha iniciado un nuevo juego
         io.sockets.emit('started');
+
+        //se define una variable de control
         var i = 0;
+
+        //se crea un iterador para mostrar a los usuarios el tiempo que ha transcurrido
         setInterval(function(){
+            //si el control es menor que el valor maximo de la etiqueta de progreso, se emite un nuevo valor
             if(i < 101) io.sockets.emit('newval', i++);
-            else{
+            else{//si es mayorm, se detiene el iterador
                 clearInterval(this);
+                //se emite un mesaje de fin del juego, se invierte el array y se envia la primera posición como el ganador
                 io.sockets.emit('finish', clicks.reverse().shift());
+                //se imorime en la consola del servidor que el juego ha finalizado
                 console.log('Ha terminado la partida - ' + moment().toDate());
             }
-        },200);
+        },200);//200 milisegundos de espera para cada ciclo de iteración
     });
 
+    //cuando un cliente cierra o actualiza su navegador, se emite un mensaje "disconnet"
     socket.on('disconnect', function(data){
+        //si el usuario no se encuentra en la lista de usuarios se regresa un mensaje vacío
         if(!socket.nickneme) return;
+        //sino se elimina el usuario de la lista de usuarios
         delete nicknames[socket.nickneme];
+        //se actualiza la lista de usuarios
         updateNickNames();
     });
 
+    //emite una lista con los usuarios registrados en la lista "nicknames"
     function updateNickNames(){
         io.sockets.emit('usernames', nicknames);
     };
 
-    socket.on('game', function(data){
-        console.log(data);
-    });
-
+    //registra un nuevo click en la lista de clicks
     socket.on('newclick', function(nick){
         clicks.push(nick);
+        //imprime en el servidor quien hizo el click y en que momento
         console.log(nick + ' - ' + moment().toDate());
     });
 
+    //indica cuando se la conectado un nuevo cliente al socket
     console.log('Se ha conectado un nuevo cliente, puerto: 3000');
 });
